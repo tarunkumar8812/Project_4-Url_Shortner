@@ -28,7 +28,7 @@ const shortenURL = async function (req, res) {
 
 
         let url_in_DB = await urlModel.findOne({ longUrl: originalUrl }).select({ _id: 0, updatedAt: 0, createdAt: 0, __v: 0 })
-        if (url_in_DB) return res.status(409).send({ status: false, message: "LongUrl is already present", shortUrl: url_in_DB.urlCode })
+        if (url_in_DB) return res.status(409).send({ status: false, message: "LongUrl is already present", shortUrl: url_in_DB.shortUrl })
 
 
         let urlCode = shortid.generate().toLowerCase()
