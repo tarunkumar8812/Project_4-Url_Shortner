@@ -17,7 +17,6 @@ mongoose.connect("mongodb+srv://yachika03:wkaTIq3zkjIou3YI@cluster0.t9qdtvx.mong
 app.use('/', route)
 
 
-
 app.use(
     function (req, res, next) {
         let time = moment().format("DD/MM/YYYY hh:mm:ss a")

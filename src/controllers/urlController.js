@@ -22,7 +22,7 @@ const shortenURL = async function (req, res) {
 
         let { originalUrl, ...rest } = body;
 
-        if (Object.keys(rest).length > 0) return res.status(400).send({ status: false, message: `You can not fill these:-( ${Object.keys(rest)} ) data ` })
+        if (Object.keys(rest).length > 0) return res.status(400).send({ status: false, message: `You can not fill these:-( ${Object.keys(rest)} ) data `})
 
         if (validUrl(originalUrl) != true) return res.status(400).send({ status: false, message: `${validUrl(originalUrl)}` })
 
@@ -35,6 +35,8 @@ const shortenURL = async function (req, res) {
 
         let shortUrl_in_DB = await urlModel.findOne({ urlCode: urlCode })
         if (shortUrl_in_DB) return res.status(409).send({ status: false, message: "shortUrl is already present" })
+
+        
 
         let baseurl = "http://localhost:3000/"
         let shortUrl = baseurl + urlCode
