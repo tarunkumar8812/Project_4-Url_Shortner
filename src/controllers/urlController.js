@@ -83,7 +83,6 @@ const getUrl = async function (req, res) {
 
         if (!shortid.isValid(urlCode)) return res.status(400).send({ status: false, message: `Invalid urlCode: - ${urlCode}` })
 
-        // let cachedUrl = await DEL_ASYNC(`${req.params.urlCode}`)
         let cachedUrl = await GET_ASYNC(`${req.params.urlCode}`)
         if (cachedUrl) {
             console.log("from cache");
@@ -93,9 +92,12 @@ const getUrl = async function (req, res) {
             let url = await urlModel.findOne({ urlCode: urlCode })//.select({ longUrl: 1, _id: 0 })
             console.log("from DB")
             if (!url) return res.status(404).send({ status: false, message: `${urlCode} urlCode not found` })
-            await SET_ASYNC(`${req.params.urlCode}`, JSON.stringify(url.longUrl))
-            const ex = await EXP_ASYNC(`${req.params.urlCode}`, 20)
-            // return res.send({ data: url });
+            const setCache = await SET_ASYNC(`${req.params.urlCode}`, JSON.stringify(url.longUrl))
+            // console.log(`SET_ASYNC - ${setCache}`);
+
+            const exp = await EXP_ASYNC(`${req.params.urlCode}`, 120)
+            // console.log(exp);
+
             return res.status(302).redirect(url.longUrl)
         }
 
@@ -103,4 +105,21 @@ const getUrl = async function (req, res) {
         return res.status(500).send({ status: false, message: err.message })
     }
 }
-module.exports = { shortenURL, getUrl }
+
+
+
+const deleteUrl = async function (req, res) {
+    try {
+        let urlCode = req.params.urlCode
+
+        if (!shortid.isValid(urlCode)) return res.status(400).send({ status: false, message: `Invalid urlCode: - ${urlCode}` })
+
+        let deletedUrl = await DEL_ASYNC(`${urlCode}`)
+        if (deletedUrl == 0) return res.send(`no cache found`)
+        return res.send(`cache deleted successful`)
+
+    } catch (err) {
+        return res.status(500).send({ status: false, message: err.message })
+    }
+}
+module.exports = { shortenURL, getUrl, deleteUrl }
