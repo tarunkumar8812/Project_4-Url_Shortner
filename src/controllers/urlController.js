@@ -49,7 +49,7 @@ const shortenURL = async function (req, res) {
         if (validUrl(longUrl) != true) return res.status(400).send({ status: false, message: `${validUrl(longUrl)}` })
 
 
-        let url_in_DB = await urlModel.findOne({ longUrl: originalUrl }).select({ _id: 0, updatedAt: 0, createdAt: 0, __v: 0 })
+        let url_in_DB = await urlModel.findOne({ longUrl: longUrl }).select({ _id: 0, updatedAt: 0, createdAt: 0, __v: 0 })
         if (url_in_DB) return res.status(409).send({ status: false, message: "LongUrl is already present", shortUrl: url_in_DB.shortUrl })
 
 
@@ -85,17 +85,19 @@ const getUrl = async function (req, res) {
 
         let cachedUrl = await GET_ASYNC(`${req.params.urlCode}`)
         if (cachedUrl) {
+            console.log(cachedUrl);
             console.log("from cache");
             // return res.send(`through caching - ${cachedUrl}`)
             return res.status(302).redirect(cachedUrl)
         } else {
             let url = await urlModel.findOne({ urlCode: urlCode })//.select({ longUrl: 1, _id: 0 })
+            console.log(url)
             console.log("from DB")
             if (!url) return res.status(404).send({ status: false, message: `${urlCode} urlCode not found` })
             const setCache = await SET_ASYNC(`${req.params.urlCode}`, JSON.stringify(url.longUrl))
             // console.log(`SET_ASYNC - ${setCache}`);
 
-            const exp = await EXP_ASYNC(`${req.params.urlCode}`, 120)
+            const exp = await EXP_ASYNC(`${req.params.urlCode}`, 20)
             // console.log(exp);
 
             return res.status(302).redirect(url.longUrl)
