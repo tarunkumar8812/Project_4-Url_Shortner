@@ -2,16 +2,16 @@ const express = require("express")
 const route = require("./routes/route")
 const moment = require("moment")
 const mongoose = require('mongoose')
-// require("dotenv").config()
+require("dotenv").config()
 const app = express();
 
 app.use(express.json());
 
-mongoose.connect("mongodb+srv://yachika03:wkaTIq3zkjIou3YI@cluster0.t9qdtvx.mongodb.net/group37Database",
-    {
-        useNewUrlParser: true
 
-    }).then(() => console.log("MongoDB is connected"))
+mongoose.connect(process.env.MONGO_URL || "mongodb+srv://TarunKumar123:xLcX9W1SI9646ftM@cluster1.tpwtwiv.mongodb.net/Project_4", {
+    useNewUrlParser: true
+})
+    .then(() => console.log("MongoDB is connected"))
     .catch((err) => console.log(err))
 
 app.use('/', route)
