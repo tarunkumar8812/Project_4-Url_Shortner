@@ -5,7 +5,9 @@ const { shortenURL, getUrl, deleteUrl } = require("../controllers/urlController.
 
 
 router.post("/url/shorten", shortenURL)
+
 router.get("/:urlCode", getUrl)
+
 router.put("/:urlCode", deleteUrl)
 
 

@@ -1,12 +1,11 @@
 const shortid = require("shortid")
-// const urlValidation = require("url-validation")
 const urlModel = require("../Model/urlModel")
 const { validUrl } = require("../validator/validation.js")
 const redis = require("redis");
 const { promisify } = require("util");
 
 
-//Connect to redis
+// Connect to redis
 const redisClient = redis.createClient(
     11480,
     "redis-11480.c212.ap-south-1-1.ec2.cloud.redislabs.com",
@@ -70,6 +69,8 @@ const shortenURL = async function (req, res) {
         longUrl = longUrl.trim()
 
 
+        // ------------------ CREATING new DATA in DataBase ----------------
+
         let data = await urlModel.create({ longUrl, shortUrl, urlCode })
 
         return res.status(201).send({ status: true, data: longUrl, shortUrl, urlCode })
@@ -113,7 +114,7 @@ const getUrl = async function (req, res) {
             const setCache = await SET_ASYNC(`${req.params.urlCode}`, JSON.stringify(url.longUrl))
 
             // ---------- setting expiry time for url in cache --------
-            const exp = await EXP_ASYNC(`${req.params.urlCode}`, 30)
+            const exp = await EXP_ASYNC(`${req.params.urlCode}`, 60*60*24)
 
             return res.status(302).redirect(url.longUrl)
         }

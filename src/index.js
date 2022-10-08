@@ -14,6 +14,7 @@ mongoose.connect(process.env.MONGO_URL || "mongodb+srv://TarunKumar123:xLcX9W1SI
     .then(() => console.log("MongoDB is connected"))
     .catch((err) => console.log(err))
 
+    
 app.use('/', route)
 
 
