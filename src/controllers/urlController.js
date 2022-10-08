@@ -40,6 +40,7 @@ const shortenURL = async function (req, res) {
     try {
         let body = req.body
 
+        // ------------------ VALIDATION part ----------------
         if (Object.keys(body).length == 0) return res.status(400).send({ status: false, message: "please enter url in body" })
 
         let { longUrl, ...rest } = body;
@@ -48,9 +49,21 @@ const shortenURL = async function (req, res) {
 
         if (validUrl(longUrl) != true) return res.status(400).send({ status: false, message: `${validUrl(longUrl)}` })
 
+        // ------------------ find in cache ----------------
+
+        let cachedUrl = await GET_ASYNC(`${longUrl}`)
+        if (cachedUrl) {
+            return res.status(200).send({ status: true, message: "Url is already present", data: JSON.parse(cachedUrl) })
+        }
+
 
         let url_in_DB = await urlModel.findOne({ longUrl: longUrl }).select({ _id: 0, updatedAt: 0, createdAt: 0, __v: 0 })
-        if (url_in_DB) return res.status(409).send({ status: false, message: "LongUrl is already present", shortUrl: url_in_DB.shortUrl })
+
+        if (url_in_DB) {
+            await SET_ASYNC(`${longUrl}`, JSON.stringify(url_in_DB))
+
+            return res.status(200).send({ status: true, message: "LongUrl is already present", shortUrl: url_in_DB.shortUrl })
+        }
 
 
         let urlCode = shortid.generate().toLowerCase()
@@ -59,14 +72,14 @@ const shortenURL = async function (req, res) {
         if (shortUrl_in_DB) return res.status(409).send({ status: false, message: "shortUrl is already present" })
 
 
-
         let baseurl = "http://localhost:3000/"
         let shortUrl = baseurl + urlCode
         longUrl = longUrl.trim()
 
 
         let data = await urlModel.create({ longUrl, shortUrl, urlCode })
-        return res.status(201).send({ status: true, message: "sortUrl successfully created", data: data })
+
+        return res.status(201).send({ status: true, data: data })
 
     }
     catch (err) {
@@ -85,14 +98,14 @@ const getUrl = async function (req, res) {
 
         let cachedUrl = await GET_ASYNC(`${req.params.urlCode}`)
         if (cachedUrl) {
-            console.log(cachedUrl);
-            console.log("from cache");
+            // console.log(cachedUrl);
+            // console.log("from cache");
             // return res.send(`through caching - ${cachedUrl}`)
             return res.status(302).redirect(cachedUrl)
         } else {
             let url = await urlModel.findOne({ urlCode: urlCode })//.select({ longUrl: 1, _id: 0 })
-            console.log(url)
-            console.log("from DB")
+            // console.log(url)
+            // console.log("from DB")
             if (!url) return res.status(404).send({ status: false, message: `${urlCode} urlCode not found` })
             const setCache = await SET_ASYNC(`${req.params.urlCode}`, JSON.stringify(url.longUrl))
             // console.log(`SET_ASYNC - ${setCache}`);

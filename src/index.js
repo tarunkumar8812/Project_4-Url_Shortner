@@ -31,7 +31,7 @@ app.listen(process.env.PORT || 3000, function () {
 
 
 app.use("/*", function (req, res) {
-    return res.status(400).send({ status: false, message: "invalid request params (path not found)" })
+    return res.status(400).send({ status: false, message: "invalid request (path not found)" })
 });
 
 
